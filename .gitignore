@@ -1,0 +1,27 @@
+# Node.js
+node_modules/
+package-lock.json
+
+# macOS system files
+.DS_Store
+
+# clangd config 
+!.clangd
+
+# VSCode/Cursor settings
+.vscode/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build files 
+build/
+*.o
+*.out
+*.obj
+*.exe
+
+# Optional cache
+.cache/
