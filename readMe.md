@@ -1,19 +1,20 @@
 
-# React Native Kyber
+# React Native Kyber & Dilithium
 
-A React Native module for Kyber post-quantum cryptography, providing secure key exchange using the Kyber768 algorithm. This package enables developers to implement post-quantum cryptographic operations in React Native applications for both iOS and Android platforms.
+A React Native module for post-quantum cryptography, providing both Kyber768 for key exchange and Dilithium3 for digital signatures. This package enables developers to implement post-quantum cryptographic operations in React Native applications for both iOS and Android platforms. Details on the source code are located below as well as instructions on how to utilize this package
 
 ## Features
 
-- 🔐 **Post-Quantum Security**: Implementation of Kyber768 algorithm
+- 🔐 **Post-Quantum Security**: Implementation of Kyber768 (key exchange) and Dilithium3 (digital signatures)
 - 📱 **Cross-Platform**: Works on both iOS and Android
 - 🚀 **Easy Integration**: Simple NPM install with auto-linking
 - 💪 **TypeScript Support**: Full type definitions included
 - ⚡ **Performance**: Native C implementation for optimal speed
 - 🛡️ **Memory Safe**: Proper memory management on both platforms
+- 🔑 **Dual Functionality**: Both key exchange and digital signatures in one package
 
-
-https://github.com/pq-crystals/kyber/tree/main/ref C script source
+**Kyber768**: Key encapsulation mechanism for secure key exchange
+**Dilithium3**: Digital signature algorithm for authentication and integrity
 
 ## Installation
 
@@ -38,37 +39,58 @@ No additional setup required. The module uses auto-linking.
 ## Quick Start
 
 ```javascript
-import Kyber from 'react-native-kyber';
+import { Kyber, Dilithium } from 'react-native-kyber';
 
-async function demonstrateKyber() {
+async function demonstratePostQuantumCrypto() {
   try {
+    // === KYBER KEY EXCHANGE ===
+    console.log('🔐 Testing Kyber Key Exchange...');
+    
     // Generate a key pair
-    const keyPair = await Kyber.generateKeyPair();
-    console.log('Key pair generated!');
+    const kyberKeyPair = await Kyber.generateKeyPair();
+    console.log('Kyber key pair generated!');
     
     // Encrypt (generates ciphertext and shared secret)
-    const encryptResult = await Kyber.encrypt(keyPair.publicKey);
-    console.log('Encryption complete!');
+    const encryptResult = await Kyber.encrypt(kyberKeyPair.publicKey);
+    console.log('Kyber encryption complete!');
     
     // Decrypt (recovers the same shared secret)
     const decryptResult = await Kyber.decrypt(
       encryptResult.ciphertext,
-      keyPair.secretKey
+      kyberKeyPair.secretKey
     );
     
     // Verify the shared secrets match
     const secretsMatch = encryptResult.sharedSecret === decryptResult.sharedSecret;
-    console.log('Shared secrets match:', secretsMatch);
+    console.log('Kyber shared secrets match:', secretsMatch);
+    
+    // === DILITHIUM DIGITAL SIGNATURES ===
+    console.log('✍️ Testing Dilithium Digital Signatures...');
+    
+    // Generate a key pair
+    const dilithiumKeyPair = await Dilithium.generateKeyPair();
+    console.log('Dilithium key pair generated!');
+    
+    // Sign a message
+    const message = "Hello, post-quantum world!";
+    const signature = await Dilithium.sign(message, dilithiumKeyPair.secretKey);
+    console.log('Message signed!');
+    
+    // Verify the signature
+    const isValid = await Dilithium.verify(message, signature.signature, dilithiumKeyPair.publicKey);
+    console.log('Signature verification:', isValid.isValid);
     
   } catch (error) {
-    console.error('Kyber operation failed:', error);
+    console.error('Post-quantum operation failed:', error);
   }
 }
 ```
 
 ## API Reference
 
-### `generateKeyPair(): Promise<KyberKeyPair>`
+### Kyber (Key Exchange)
+
+#### `Kyber.generateKeyPair(): Promise<KyberKeyPair>`
 
 Generates a new Kyber768 key pair.
 
@@ -80,14 +102,7 @@ interface KyberKeyPair {
 }
 ```
 
-**Example:**
-```javascript
-const keyPair = await Kyber.generateKeyPair();
-```
-
----
-
-### `encrypt(publicKeyBase64: string): Promise<KyberEncryptResult>`
+#### `Kyber.encrypt(publicKeyBase64: string): Promise<KyberEncryptResult>`
 
 Encrypts using a public key to generate ciphertext and shared secret.
 
@@ -102,14 +117,7 @@ interface KyberEncryptResult {
 }
 ```
 
-**Example:**
-```javascript
-const encryptResult = await Kyber.encrypt(keyPair.publicKey);
-```
-
----
-
-### `decrypt(ciphertextBase64: string, secretKeyBase64: string): Promise<KyberDecryptResult>`
+#### `Kyber.decrypt(ciphertextBase64: string, secretKeyBase64: string): Promise<KyberDecryptResult>`
 
 Decrypts ciphertext using secret key to recover shared secret.
 
@@ -124,27 +132,62 @@ interface KyberDecryptResult {
 }
 ```
 
-**Example:**
-```javascript
-const decryptResult = await Kyber.decrypt(
-  encryptResult.ciphertext,
-  keyPair.secretKey
-);
-```
+#### `Kyber.hello(): Promise<string>`
+
+Simple test method to verify the Kyber module is working correctly.
 
 ---
 
-### `hello(): Promise<string>`
+### Dilithium (Digital Signatures)
 
-Simple test method to verify the module is working correctly.
+#### `Dilithium.generateKeyPair(): Promise<DilithiumKeyPair>`
 
-**Returns:** Promise resolving to a test string
+Generates a new Dilithium3 key pair.
 
-**Example:**
-```javascript
-const message = await Kyber.hello();
-console.log(message); // "Hello from React Native Kyber!"
+**Returns:**
+```typescript
+interface DilithiumKeyPair {
+  publicKey: string;  // Base64 encoded public key (1952 bytes)
+  secretKey: string;  // Base64 encoded secret key (4000 bytes)
+}
 ```
+
+#### `Dilithium.sign(message: string, secretKeyBase64: string): Promise<DilithiumSignResult>`
+
+Signs a message using a secret key.
+
+**Parameters:**
+- `message` (string): The message to sign
+- `secretKeyBase64` (string): Base64 encoded secret key
+
+**Returns:**
+```typescript
+interface DilithiumSignResult {
+  signature: string;  // Base64 encoded signature (2701 bytes)
+}
+```
+
+#### `Dilithium.verify(message: string, signatureBase64: string, publicKeyBase64: string): Promise<DilithiumVerifyResult>`
+
+Verifies a signature using a public key.
+
+**Parameters:**
+- `message` (string): The original message
+- `signatureBase64` (string): Base64 encoded signature
+- `publicKeyBase64` (string): Base64 encoded public key
+
+**Returns:**
+```typescript
+interface DilithiumVerifyResult {
+  isValid: boolean;  // Whether the signature is valid
+}
+```
+
+#### `Dilithium.hello(): Promise<string>`
+
+Simple test method to verify the Dilithium module is working correctly.
+
+---
 
 ## Error Handling
 
@@ -152,7 +195,8 @@ All methods return promises that will reject with descriptive error messages:
 
 ```javascript
 try {
-  const keyPair = await Kyber.generateKeyPair();
+  const kyberKeyPair = await Kyber.generateKeyPair();
+  const dilithiumKeyPair = await Dilithium.generateKeyPair();
 } catch (error) {
   switch (error.code) {
     case 'ERR_KEYGEN':
@@ -163,6 +207,12 @@ try {
       break;
     case 'ERR_DECRYPT':
       console.error('Decryption failed');
+      break;
+    case 'ERR_SIGN':
+      console.error('Signing failed');
+      break;
+    case 'ERR_VERIFY':
+      console.error('Verification failed');
       break;
     case 'ERR_INVALID_KEY':
       console.error('Invalid key provided');
@@ -182,11 +232,18 @@ try {
   - Android: Android Keystore or EncryptedSharedPreferences
   - React Native: react-native-keychain
 
-### Key Sizes (Kyber768)
+### Key Sizes
+
+**Kyber768:**
 - **Public Key**: 1184 bytes
 - **Secret Key**: 2400 bytes  
 - **Ciphertext**: 1088 bytes
 - **Shared Secret**: 32 bytes
+
+**Dilithium3:**
+- **Public Key**: 1952 bytes
+- **Secret Key**: 4000 bytes
+- **Signature**: 2701 bytes
 
 ### Memory Management
 - Keys are automatically cleared from memory after use
@@ -194,7 +251,7 @@ try {
 
 ## Use Cases
 
-### 1. Secure Key Exchange
+### 1. Secure Key Exchange with Kyber
 ```javascript
 // Alice generates key pair
 const aliceKeyPair = await Kyber.generateKeyPair();
@@ -215,14 +272,38 @@ const aliceDecryptResult = await Kyber.decrypt(ciphertext, aliceKeyPair.secretKe
 const sharedSecret = aliceDecryptResult.sharedSecret;
 ```
 
-### 2. Symmetric Key Generation
+### 2. Digital Signatures with Dilithium
 ```javascript
-// Generate a shared secret for symmetric encryption
-const keyPair = await Kyber.generateKeyPair();
-const encryptResult = await Kyber.encrypt(keyPair.publicKey);
+// Generate a key pair for signing
+const signerKeyPair = await Dilithium.generateKeyPair();
 
-// Use the shared secret as a key for AES encryption
-const symmetricKey = encryptResult.sharedSecret;
+// Sign a message
+const message = "Important document content";
+const signature = await Dilithium.sign(message, signerKeyPair.secretKey);
+
+// Send message and signature to verifier
+// (public key can be shared publicly)
+
+// Verifier checks the signature
+const isValid = await Dilithium.verify(message, signature.signature, signerKeyPair.publicKey);
+console.log('Signature is valid:', isValid.isValid);
+```
+
+### 3. Combined Post-Quantum Security
+```javascript
+// Generate keys for both operations
+const kyberKeyPair = await Kyber.generateKeyPair();
+const dilithiumKeyPair = await Dilithium.generateKeyPair();
+
+// Establish secure channel with Kyber
+const encryptResult = await Kyber.encrypt(kyberKeyPair.publicKey);
+const decryptResult = await Kyber.decrypt(encryptResult.ciphertext, kyberKeyPair.secretKey);
+
+// Sign the shared secret with Dilithium
+const signature = await Dilithium.sign(decryptResult.sharedSecret, dilithiumKeyPair.secretKey);
+
+// Verify the signature
+const isValid = await Dilithium.verify(decryptResult.sharedSecret, signature.signature, dilithiumKeyPair.publicKey);
 ```
 
 ## Troubleshooting
@@ -237,9 +318,9 @@ pod install
 ```
 
 **Build errors:**
-- Ensure Xcode 12.0+ is being used
-- Check that all Kyber C files are included in the build
-- "0.72.6" react-native
+- Ensure Xcode 16.0+ is being used
+- Check that all C files are included in the build
+- "^0.72.6" react-native
 
 ### Android Issues
 
@@ -249,7 +330,7 @@ pod install
 
 **CMake errors:**
 - Ensure CMake 3.18.1+ is available
-- Check that all Kyber C files are in the correct directory
+- Check that all C files are in the correct directory
 
 ### General Issues
 
@@ -271,9 +352,12 @@ npm install --save-dev @types/react-native
 
 ## Performance
 
-- **Key Generation**: ~1-2ms on modern devices
-- **Encryption**: ~0.5-1ms on modern devices  
-- **Decryption**: ~0.5-1ms on modern devices
+- **Kyber Key Generation**: ~1-2ms on modern devices
+- **Kyber Encryption**: ~0.5-1ms on modern devices  
+- **Kyber Decryption**: ~0.5-1ms on modern devices
+- **Dilithium Key Generation**: ~2-3ms on modern devices
+- **Dilithium Signing**: ~1-2ms on modern devices
+- **Dilithium Verification**: ~0.5-1ms on modern devices
 - **Memory Usage**: Minimal, automatic cleanup
 
 ## Compatibility
@@ -350,64 +434,74 @@ npm install ../react-native-kyber/react-native-kyber-*.tgz
 cd ios && pod install && cd ..
 ```
 
-### 3. Useage Example
+### 3. Usage Example
 
-Create `TestSimple.js`:
+Create `TestBoth.js`:
 
 ```javascript
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Kyber from 'react-native-kyber';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { Kyber, Dilithium } from 'react-native-kyber';
 
-const TestSimple = () => {
-  const [result, setResult] = useState('Press test button');
+const TestBoth = () => {
+  const [log, setLog] = useState('Ready to test...\n');
 
-  const testKyber = async () => {
+  const addLog = (msg) => setLog(prev => prev + `${msg}\n`);
+
+  const testBoth = async () => {
+    setLog('Testing Kyber & Dilithium...\n');
+    
     try {
-      setResult('Testing...');
+      // Test Kyber
+      addLog('🔐 Testing Kyber...');
+      const kyberKeys = await Kyber.generateKeyPair();
+      addLog('✅ Kyber Keys generated');
       
-      // Test hello
-      const hello = await Kyber.hello();
-      setResult(`Hello: ${hello}`);
+      const kyberEnc = await Kyber.encrypt(kyberKeys.publicKey);
+      addLog('✅ Kyber Encrypted');
       
-      // Test key generation
-      const keyPair = await Kyber.generateKeyPair();
-      setResult(prev => prev + `\nKeys generated!`);
+      const kyberDec = await Kyber.decrypt(kyberEnc.ciphertext, kyberKeys.secretKey);
+      const kyberMatch = kyberEnc.sharedSecret === kyberDec.sharedSecret;
+      addLog(kyberMatch ? '🎉 Kyber SUCCESS' : '❌ Kyber FAIL');
       
-      // Test encryption
-      const encrypted = await Kyber.encrypt(keyPair.publicKey);
-      setResult(prev => prev + `\nEncryption done!`);
+      // Test Dilithium
+      addLog('✍️ Testing Dilithium...');
+      const dilithiumKeys = await Dilithium.generateKeyPair();
+      addLog('✅ Dilithium Keys generated');
       
-      // Test decryption
-      const decrypted = await Kyber.decrypt(encrypted.ciphertext, keyPair.secretKey);
+      const message = "Hello, post-quantum world!";
+      const signature = await Dilithium.sign(message, dilithiumKeys.secretKey);
+      addLog('✅ Dilithium Signed');
       
-      // Check if secrets match
-      const match = encrypted.sharedSecret === decrypted.sharedSecret;
-      setResult(prev => prev + `\nSecrets match: ${match ? '✅' : '❌'}`);
+      const verify = await Dilithium.verify(message, signature.signature, dilithiumKeys.publicKey);
+      addLog(verify.isValid ? '🎉 Dilithium SUCCESS' : '❌ Dilithium FAIL');
       
     } catch (error) {
-      setResult(`Error: ${error.message}`);
+      addLog(`❌ Error: ${error.message}`);
     }
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.button} onPress={testKyber}>
-        <Text style={styles.buttonText}>Test Kyber</Text>
+      <TouchableOpacity style={styles.button} onPress={testBoth}>
+        <Text style={styles.buttonText}>Test Both</Text>
       </TouchableOpacity>
-      <Text style={styles.result}>{result}</Text>
+      <ScrollView style={styles.log}>
+        <Text style={styles.logText}>{log}</Text>
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20 },
+  container: { flex: 1, padding: 20 },
   button: { backgroundColor: '#007AFF', padding: 15, borderRadius: 8, marginBottom: 20 },
   buttonText: { color: 'white', textAlign: 'center', fontSize: 18 },
-  result: { fontSize: 16, textAlign: 'center' },
+  log: { flex: 1, backgroundColor: '#000', borderRadius: 8, padding: 10 },
+  logText: { color: '#0f0', fontFamily: 'Courier', fontSize: 14 },
 });
 
-export default TestSimple;
+export default TestBoth;
 ```
 
 ### 4. Run Tests
@@ -423,11 +517,15 @@ npx react-native run-android
 ## What to Expect
 
 When the tests run successfully, you should see:
-- ✅ Hello message from native module
-- ✅ Key pair generation with proper lengths
-- ✅ Encryption producing ciphertext and shared secret
-- ✅ Decryption recovering the same shared secret
-- ✅ All shared secrets matching between encrypt/decrypt
+- ✅ Kyber hello message from native module
+- ✅ Kyber key pair generation with proper lengths
+- ✅ Kyber encryption producing ciphertext and shared secret
+- ✅ Kyber decryption recovering the same shared secret
+- ✅ Kyber shared secrets matching between encrypt/decrypt
+- ✅ Dilithium hello message from native module
+- ✅ Dilithium key pair generation with proper lengths
+- ✅ Dilithium signing producing valid signature
+- ✅ Dilithium verification confirming signature validity
 
 ## Common Issues & Solutions
 
@@ -452,3 +550,22 @@ cd android
 cd ..
 npx react-native run-android
 ```
+
+
+### Kyber and Dilithium Source code
+
+The Source code can be found here: https://github.com/pq-crystals this is the Official 
+reference implementation for Kyber and Dilithium as defined here: https://pq-crystals.org/
+
+We exposed the recommended Kyber and Dilithium modes, we may expand to all modes in the future, 
+if the source code is updated, this package will also implement the update
+
+Cypher Technologies Co DID NOT make this code, nor do we claim any ownership over it. 
+
+This is open source software provided as is. 
+
+
+## Dev Testing
+
+To see how the package works, fork the project and run ./test-local.sh. This will create a folder called KyberTestApp -> run npx-react-native run-ios or run-android to have a project to validate cryptographic operations. 
+

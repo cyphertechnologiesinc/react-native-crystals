@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class KyberPackage implements ReactPackage {
+public class ReactNativeKyberPackage implements ReactPackage {
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
         return Collections.emptyList();
@@ -17,6 +17,9 @@ public class KyberPackage implements ReactPackage {
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        return Arrays.<NativeModule>asList(new KyberModule(reactContext));
+        return Arrays.<NativeModule>asList(
+            new KyberModule(reactContext),
+            new DilithiumModule(reactContext)
+        );
     }
-}
+} 

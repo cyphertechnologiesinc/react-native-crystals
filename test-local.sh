@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "🧪 React Native Kyber - NPM Only Testing Script"
-echo "==============================================="
+echo "�� React Native Kyber & Dilithium - NPM Only Testing Script"
+echo "============================================================"
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -38,7 +38,6 @@ cd ..
 rm -rf KyberTestApp
 
 # Create with npm, no yarn
-
 npx @react-native-community/cli@latest init KyberTestApp
 
 echo "🚀 done creation moving to install..."
@@ -46,13 +45,12 @@ cd KyberTestApp
 
 npm install
 
-
 print_status "Test project created with npm"
 
-# Step 3: Install our package  This will walk you through creating a new React Native project
+# Step 3: Install our package
 echo ""
 echo "📥 Installing Kyber package..."
-npm install ../react-native-kyber/$TARBALL
+npm install ../react-native-crystals/$TARBALL
 print_status "Package installed"
 
 # Step 4: iOS setup
@@ -71,13 +69,8 @@ echo "📝 Creating test..."
 cat > KyberTest.js << 'EOF'
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { Kyber, Dilithium } from 'react-native-kyber';
 
-let Kyber;
-try {
-  Kyber = require('react-native-kyber').default;
-} catch (e) {
-  console.log('Kyber import failed:', e);
-}
 
 export default function KyberTest() {
   const [log, setLog] = useState('Ready to test...\n');
@@ -85,47 +78,83 @@ export default function KyberTest() {
 
   const addLog = (msg) => setLog(prev => prev + `${msg}\n`);
 
-  const test = async () => {
-    setTesting(true);
-    setLog('Testing Kyber...\n');
+  const testKyber = async () => {
+    addLog('🔐 Testing Kyber...');
     
     try {
       if (!Kyber) throw new Error('Kyber not imported');
       
-      addLog('✅ Module loaded');
+      addLog('✅ Kyber module loaded');
       
       const hello = await Kyber.hello();
-      addLog(`✅ Hello: ${hello}`);
+      addLog(`✅ Kyber Hello: ${hello}`);
       
       const keys = await Kyber.generateKeyPair();
-      addLog(`✅ Keys: pub=${keys.publicKey.length}, sec=${keys.secretKey.length}`);
+      addLog(`✅ Kyber Keys: pub=${keys.publicKey.length}, sec=${keys.secretKey.length}`);
       
       const enc = await Kyber.encrypt(keys.publicKey);
-      addLog(`✅ Encrypted: ct=${enc.ciphertext.length}, ss=${enc.sharedSecret.length}`);
+      addLog(`✅ Kyber Encrypted: ct=${enc.ciphertext.length}, ss=${enc.sharedSecret.length}`);
       
       const dec = await Kyber.decrypt(enc.ciphertext, keys.secretKey);
-      addLog(`✅ Decrypted: ss=${dec.sharedSecret.length}`);
+      addLog(`✅ Kyber Decrypted: ss=${dec.sharedSecret.length}`);
       
       const match = enc.sharedSecret === dec.sharedSecret;
-      addLog(match ? '🎉 SUCCESS: Secrets match!' : '❌ FAIL: Secrets differ');
+      addLog(match ? '🎉 Kyber SUCCESS: Secrets match!' : '❌ Kyber FAIL: Secrets differ');
       
     } catch (error) {
-      addLog(`❌ Error: ${error.message}`);
+      addLog(`❌ Kyber Error: ${error.message}`);
     }
+  };
+
+  const testDilithium = async () => {
+    addLog('✍️ Testing Dilithium...');
+    
+    try {
+      if (!Dilithium) throw new Error('Dilithium not imported');
+      
+      addLog('✅ Dilithium module loaded');
+      
+      const hello = await Dilithium.hello();
+      addLog(`✅ Dilithium Hello: ${hello}`);
+      
+      const keys = await Dilithium.generateKeyPair();
+      addLog(`✅ Dilithium Keys: pub=${keys.publicKey.length}, sec=${keys.secretKey.length}`);
+      
+      const message = "Hello, post-quantum world!";
+      const sign = await Dilithium.sign(message, keys.secretKey);
+      addLog(`✅ Dilithium Signed: sig=${sign.signature.length}`);
+      
+      const verify = await Dilithium.verify(message, sign.signature, keys.publicKey);
+      addLog(`✅ Dilithium Verified: ${verify.isValid}`);
+      
+      addLog(verify.isValid ? '🎉 Dilithium SUCCESS: Signature verified!' : '❌ Dilithium FAIL: Signature invalid');
+      
+    } catch (error) {
+      addLog(`❌ Dilithium Error: ${error.message}`);
+    }
+  };
+
+  const test = async () => {
+    setTesting(true);
+    setLog('Testing Kyber & Dilithium...\n');
+    
+    await testKyber();
+    addLog('');
+    await testDilithium();
     
     setTesting(false);
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Kyber Test</Text>
+      <Text style={styles.title}>Kyber & Dilithium Test</Text>
       <TouchableOpacity 
         style={[styles.button, testing && styles.disabled]} 
         onPress={test} 
         disabled={testing}
       >
         <Text style={styles.buttonText}>
-          {testing ? 'Testing...' : 'Test Kyber'}
+          {testing ? 'Testing...' : 'Test Both'}
         </Text>
       </TouchableOpacity>
       <ScrollView style={styles.log}>
@@ -163,5 +192,5 @@ print_status "Run: cd KyberTestApp"
 print_warning "Android: npx react-native run-android"
 print_warning "iOS: npx react-native run-ios"
 echo ""
-echo "📱 The app will show a 'Test Kyber' button"
-echo "📍 Location: $(pwd)"
+echo "📱 The app will show a 'Test Both' button"
+echo "�� Location: $(pwd)"

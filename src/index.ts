@@ -19,6 +19,17 @@ const KyberModule = NativeModules.Kyber
       }
     );
 
+const DilithiumModule = NativeModules.Dilithium
+  ? NativeModules.Dilithium
+  : new Proxy(
+      {},
+      {
+        get() {
+          throw new Error(LINKING_ERROR);
+        },
+      }
+    );
+
 export interface KyberKeyPair {
   publicKey: string;  // Base64 encoded
   secretKey: string;  // Base64 encoded
@@ -61,4 +72,52 @@ export interface KyberInterface {
   decrypt(ciphertextBase64: string, secretKeyBase64: string): Promise<KyberDecryptResult>;
 }
 
+export interface DilithiumKeyPair {
+  publicKey: string;  // Base64 encoded
+  secretKey: string;  // Base64 encoded
+}
+
+export interface DilithiumSignResult {
+  signature: string;  // Base64 encoded
+}
+
+export interface DilithiumVerifyResult {
+  isValid: boolean;
+}
+
+export interface DilithiumInterface {
+  /**
+   * Simple hello method for testing the module connection
+   */
+  hello(): Promise<string>;
+  
+  /**
+   * Generate a new Dilithium3 key pair
+   * @returns Promise resolving to a key pair with base64 encoded keys
+   */
+  generateKeyPair(): Promise<DilithiumKeyPair>;
+  
+  /**
+   * Sign a message using a secret key
+   * @param message The message to sign
+   * @param secretKeyBase64 Base64 encoded secret key
+   * @returns Promise resolving to the signature (base64 encoded)
+   */
+  sign(message: string, secretKeyBase64: string): Promise<DilithiumSignResult>;
+  
+  /**
+   * Verify a signature using a public key
+   * @param message The original message
+   * @param signatureBase64 Base64 encoded signature
+   * @param publicKeyBase64 Base64 encoded public key
+   * @returns Promise resolving to verification result
+   */
+  verify(message: string, signatureBase64: string, publicKeyBase64: string): Promise<DilithiumVerifyResult>;
+}
+
+// Export both modules
+export const Kyber = KyberModule as KyberInterface;
+export const Dilithium = DilithiumModule as DilithiumInterface;
+
+// Default export for backward compatibility (Kyber)
 export default KyberModule as KyberInterface;

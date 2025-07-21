@@ -27,8 +27,8 @@ class KyberModule: NSObject {
             secretKeyPtr.deallocate()
         }
         
-        // Call the specific Kyber768 function (matching your Android code)
-        let result = pqcrystals_kyber768_ref_keypair(publicKeyPtr, secretKeyPtr)
+        // Call the wrapper function
+        let result = kyber_keypair_wrapper(publicKeyPtr, secretKeyPtr)
         
         if result == 0 {
             // Convert to Data
@@ -65,9 +65,9 @@ class KyberModule: NSObject {
             sharedSecretPtr.deallocate()
         }
         
-        // Call the specific Kyber768 encrypt function
+        // Call the wrapper function
         let result = publicKeyData.withUnsafeBytes { pubKeyBytes in
-            pqcrystals_kyber768_ref_enc(ciphertextPtr, sharedSecretPtr, pubKeyBytes.bindMemory(to: UInt8.self).baseAddress!)
+            kyber_enc_wrapper(ciphertextPtr, sharedSecretPtr, pubKeyBytes.bindMemory(to: UInt8.self).baseAddress!)
         }
         
         if result == 0 {
@@ -111,10 +111,10 @@ class KyberModule: NSObject {
             sharedSecretPtr.deallocate()
         }
         
-        // Call the specific Kyber768 decrypt function (matching your Android code)
+        // Call the wrapper function
         let result = ciphertextData.withUnsafeBytes { ciphertextBytes in
             secretKeyData.withUnsafeBytes { secretKeyBytes in
-                pqcrystals_kyber768_ref_dec(sharedSecretPtr,
+                kyber_dec_wrapper(sharedSecretPtr,
                               ciphertextBytes.bindMemory(to: UInt8.self).baseAddress!,
                               secretKeyBytes.bindMemory(to: UInt8.self).baseAddress!)
             }
@@ -134,12 +134,12 @@ class KyberModule: NSObject {
     }
 }
 
-// MARK: - C Function Declarations (corrected to match actual function names)
-@_silgen_name("pqcrystals_kyber768_ref_keypair")
-func pqcrystals_kyber768_ref_keypair(_ pk: UnsafeMutablePointer<UInt8>, _ sk: UnsafeMutablePointer<UInt8>) -> Int32
+// MARK: - C Function Declarations (using wrapper functions)
+@_silgen_name("kyber_keypair_wrapper")
+func kyber_keypair_wrapper(_ pk: UnsafeMutablePointer<UInt8>, _ sk: UnsafeMutablePointer<UInt8>) -> Int32
 
-@_silgen_name("pqcrystals_kyber768_ref_enc")
-func pqcrystals_kyber768_ref_enc(_ ct: UnsafeMutablePointer<UInt8>, _ ss: UnsafeMutablePointer<UInt8>, _ pk: UnsafePointer<UInt8>) -> Int32
+@_silgen_name("kyber_enc_wrapper")
+func kyber_enc_wrapper(_ ct: UnsafeMutablePointer<UInt8>, _ ss: UnsafeMutablePointer<UInt8>, _ pk: UnsafePointer<UInt8>) -> Int32
 
-@_silgen_name("pqcrystals_kyber768_ref_dec")
-func pqcrystals_kyber768_ref_dec(_ ss: UnsafeMutablePointer<UInt8>, _ ct: UnsafePointer<UInt8>, _ sk: UnsafePointer<UInt8>) -> Int32
+@_silgen_name("kyber_dec_wrapper")
+func kyber_dec_wrapper(_ ss: UnsafeMutablePointer<UInt8>, _ ct: UnsafePointer<UInt8>, _ sk: UnsafePointer<UInt8>) -> Int32
