@@ -1,7 +1,29 @@
 
 # React Native Kyber & Dilithium
 
-A React Native module for post-quantum cryptography, providing both Kyber768 for key exchange and Dilithium3 for digital signatures. This package enables developers to implement post-quantum cryptographic operations in React Native applications for both iOS and Android platforms. Details on the source code are located below as well as instructions on how to utilize this package
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+A React Native module for post-quantum cryptography, providing both Kyber768 for key exchange and Dilithium3 for digital signatures. This package enables developers to implement quantum-resistant cryptographic operations in React Native applications for both iOS and Android platforms.
+
+**Why Post-Quantum Cryptography?** As quantum computers advance, they pose a threat to current cryptographic standards. This package helps future-proof your applications with NIST-approved post-quantum algorithms.
+
+## Table of Contents
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [API Reference](#api-reference)
+- [Error Handling](#error-handling)
+- [Security Considerations](#security-considerations)
+- [Use Cases](#use-cases)
+- [Troubleshooting](#troubleshooting)
+- [Performance](#performance)
+- [Compatibility](#compatibility)
+- [Contributing](#contributing)
+- [License](#license)
+- [Local Testing Guide](#local-testing-guide)
+- [Repository Information](#repository-information)
+- [Support](#support)
+- [Project Structure](#project-structure)
 
 ## Features
 
@@ -28,9 +50,9 @@ yarn add react-native-kyber
 
 ```bash
 cd ios && pod install
-
-testing has been done on IPhone15 and up 
 ```
+
+Testing has been done on iPhone 15 and up.
 
 ### Android Setup
 
@@ -45,41 +67,41 @@ async function demonstratePostQuantumCrypto() {
   try {
     // === KYBER KEY EXCHANGE ===
     console.log('🔐 Testing Kyber Key Exchange...');
-    
+
     // Generate a key pair
     const kyberKeyPair = await Kyber.generateKeyPair();
     console.log('Kyber key pair generated!');
-    
+
     // Encrypt (generates ciphertext and shared secret)
     const encryptResult = await Kyber.encrypt(kyberKeyPair.publicKey);
     console.log('Kyber encryption complete!');
-    
+
     // Decrypt (recovers the same shared secret)
     const decryptResult = await Kyber.decrypt(
       encryptResult.ciphertext,
       kyberKeyPair.secretKey
     );
-    
+
     // Verify the shared secrets match
     const secretsMatch = encryptResult.sharedSecret === decryptResult.sharedSecret;
     console.log('Kyber shared secrets match:', secretsMatch);
-    
+
     // === DILITHIUM DIGITAL SIGNATURES ===
     console.log('✍️ Testing Dilithium Digital Signatures...');
-    
+
     // Generate a key pair
     const dilithiumKeyPair = await Dilithium.generateKeyPair();
     console.log('Dilithium key pair generated!');
-    
+
     // Sign a message
     const message = "Hello, post-quantum world!";
     const signature = await Dilithium.sign(message, dilithiumKeyPair.secretKey);
     console.log('Message signed!');
-    
+
     // Verify the signature
     const isValid = await Dilithium.verify(message, signature.signature, dilithiumKeyPair.publicKey);
     console.log('Signature verification:', isValid.isValid);
-    
+
   } catch (error) {
     console.error('Post-quantum operation failed:', error);
   }
@@ -320,7 +342,6 @@ pod install
 **Build errors:**
 - Ensure Xcode 16.0+ is being used
 - Check that all C files are included in the build
-- "^0.72.6" react-native
 
 ### Android Issues
 
@@ -362,7 +383,7 @@ npm install --save-dev @types/react-native
 
 ## Compatibility
 
-- **React Native**: 0.60+
+- **React Native**: 0.72.6+
 - **iOS**: 11.0+
 - **Android**: API 21+ (Android 5.0)
 - **Node.js**: 16+
@@ -382,9 +403,18 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 MIT
 
+## Repository Information
+
+This package is published as `react-native-kyber` on npm, while the source repository may appear as `react-native-crystals`. Both refer to the same project.
+
+- **NPM Package**: [react-native-kyber](https://www.npmjs.com/package/react-native-kyber)
+- **GitHub Repository**: [CypherTechnologiesCo/react-native-kyber](https://github.com/CypherTechnologiesCo/react-native-kyber)
+
 ---
 
 # Local Testing Guide
+
+For detailed testing instructions, see [TESTING.md](TESTING.md).
 
 ## Prerequisites
 
@@ -394,16 +424,15 @@ Before testing, ensure you have:
 - iOS: Xcode 12.0+, CocoaPods
 - Android: Android Studio, NDK
 
-## Testing Script
-
-### 1. Run Test Script (`test-local.sh`) 
-
-This will create a sample application that can run on both IOS and android to show the library works, its a little over the top. 
+## Quick Test
 
 ```bash
+# Run the automated test script
 chmod +x test-local.sh
 ./test-local.sh
 ```
+
+This will create a sample application that can run on both iOS and Android to demonstrate the library functionality.
 
 ## Manual Testing Steps
 
@@ -450,32 +479,32 @@ const TestBoth = () => {
 
   const testBoth = async () => {
     setLog('Testing Kyber & Dilithium...\n');
-    
+
     try {
       // Test Kyber
       addLog('🔐 Testing Kyber...');
       const kyberKeys = await Kyber.generateKeyPair();
       addLog('✅ Kyber Keys generated');
-      
+
       const kyberEnc = await Kyber.encrypt(kyberKeys.publicKey);
       addLog('✅ Kyber Encrypted');
-      
+
       const kyberDec = await Kyber.decrypt(kyberEnc.ciphertext, kyberKeys.secretKey);
       const kyberMatch = kyberEnc.sharedSecret === kyberDec.sharedSecret;
       addLog(kyberMatch ? '🎉 Kyber SUCCESS' : '❌ Kyber FAIL');
-      
+
       // Test Dilithium
       addLog('✍️ Testing Dilithium...');
       const dilithiumKeys = await Dilithium.generateKeyPair();
       addLog('✅ Dilithium Keys generated');
-      
+
       const message = "Hello, post-quantum world!";
       const signature = await Dilithium.sign(message, dilithiumKeys.secretKey);
       addLog('✅ Dilithium Signed');
-      
+
       const verify = await Dilithium.verify(message, signature.signature, dilithiumKeys.publicKey);
       addLog(verify.isValid ? '🎉 Dilithium SUCCESS' : '❌ Dilithium FAIL');
-      
+
     } catch (error) {
       addLog(`❌ Error: ${error.message}`);
     }
@@ -569,3 +598,22 @@ This is open source software provided as is.
 
 To see how the package works, fork the project and run ./test-local.sh. This will create a folder called KyberTestApp -> run npx-react-native run-ios or run-android to have a project to validate cryptographic operations. 
 
+## Support
+
+If you encounter any issues or have questions about this package:
+
+- [Open an issue](https://github.com/CypherTechnologiesCo/react-native-kyber/issues) on GitHub
+- Contact the maintainers at [info@cyphertechnologies.co](mailto:info@cyphertechnologies.co)
+
+For security-related issues, please refer to our [Security Policy](SECURITY.md).
+
+## Project Structure
+
+```
+├── android/          # Android native code
+├── ios/              # iOS native code
+├── src/              # TypeScript source code
+├── lib/              # Compiled JavaScript (generated)
+├── example/          # Example application
+└── test-local.sh     # Testing script
+```
