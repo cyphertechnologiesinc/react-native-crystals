@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: React Native Kyber & Dilithium Community Support
+    url: https://github.com/CypherTechnologiesCo/react-native-crystals/discussions
+    about: Please ask and answer questions here.
+  - name: Security Vulnerabilities
+    url: mailto:security@cyphertechnologies.co
+    about: Please report security vulnerabilities directly to our security team.
